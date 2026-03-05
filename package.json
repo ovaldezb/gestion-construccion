@@ -1,0 +1,30 @@
+{
+  "name": "gestion-construccion",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "serverless offline"
+  },
+  "keywords": [],
+  "author": "Omar Valdez",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@serverless/typescript": "^4.30.0",
+    "@types/aws-lambda": "^8.10.160",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^25.2.3",
+    "esbuild": "^0.27.3",
+    "lodash": "^4.17.23",
+    "serverless": "3.38.0",
+    "serverless-esbuild": "^1.57.0",
+    "serverless-offline": "^8.8.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "mongoose": "^9.2.1"
+  }
+}
