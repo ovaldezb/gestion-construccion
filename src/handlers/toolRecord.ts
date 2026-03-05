@@ -49,7 +49,6 @@ export const registerToolMovement: APIGatewayProxyHandler = async (event) => {
             employeeId,
             type,
             comentario,
-            comentario,
             timestamp: body.timestamp || new Date()
         });
 

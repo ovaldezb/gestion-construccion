@@ -140,6 +140,38 @@ const serverlessConfiguration: AWS = {
             handler: 'src/handlers/toolRecord.listToolRecords',
             events: [{ http: { method: 'get', path: 'tool-records', cors: true } }],
         },
+        createVehicle: {
+            handler: 'src/handlers/vehicles.createVehicle',
+            events: [{ http: { method: 'post', path: 'vehicles', cors: true } }],
+        },
+        listVehicles: {
+            handler: 'src/handlers/vehicles.listVehicles',
+            events: [{ http: { method: 'get', path: 'vehicles', cors: true } }],
+        },
+        getVehicle: {
+            handler: 'src/handlers/vehicles.getVehicle',
+            events: [{ http: { method: 'get', path: 'vehicles/{id}', cors: true } }],
+        },
+        updateVehicle: {
+            handler: 'src/handlers/vehicles.updateVehicle',
+            events: [{ http: { method: 'put', path: 'vehicles/{id}', cors: true } }],
+        },
+        deleteVehicle: {
+            handler: 'src/handlers/vehicles.deleteVehicle',
+            events: [{ http: { method: 'delete', path: 'vehicles/{id}', cors: true } }],
+        },
+        registerVehicleMovement: {
+            handler: 'src/handlers/vehicleRecord.registerMovement',
+            events: [{ http: { method: 'post', path: 'vehicle-records', cors: true } }],
+        },
+        getVehicleHistory: {
+            handler: 'src/handlers/vehicleRecord.getVehicleHistory',
+            events: [{ http: { method: 'get', path: 'vehicle-records/{id}', cors: true } }],
+        },
+        getAllVehicleRecords: {
+            handler: 'src/handlers/vehicleRecord.getAllVehicleRecords',
+            events: [{ http: { method: 'get', path: 'vehicle-records', cors: true } }],
+        },
     },
     package: { individually: true },
     custom: {
