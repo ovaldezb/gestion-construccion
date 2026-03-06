@@ -132,6 +132,10 @@ const serverlessConfiguration: AWS = {
             handler: 'src/handlers/attendance.listAttendance',
             events: [{ http: { method: 'get', path: 'attendance', cors: true } }],
         },
+        reportAttendance: {
+            handler: 'src/handlers/attendance.reportAttendance',
+            events: [{ http: { method: 'get', path: 'attendance/report', cors: true } }],
+        },
         registerToolMovement: {
             handler: 'src/handlers/toolRecord.registerToolMovement',
             events: [{ http: { method: 'post', path: 'tool-records', cors: true } }],
