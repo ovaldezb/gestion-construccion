@@ -19,6 +19,9 @@ const serverlessConfiguration: AWS = {
             COGNITO_USER_POOL_ID: '${env:COGNITO_USER_POOL_ID, "Ref:CognitoUserPool"}',
             VEHICLE_PHOTOS_BUCKET_NAME: '${self:service}-${self:provider.stage}-vehicle-photos',
         },
+        apiGateway: {
+            binaryMediaTypes: ['*/*'],
+        },
         iam: {
             role: {
                 statements: [

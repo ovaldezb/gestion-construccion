@@ -3,6 +3,7 @@ import { executeConnection } from '../libs/db';
 import { Attendance } from '../models/Attendance';
 import { Employee } from '../models/Employee';
 import '../models/Location'; // Register Location model
+import * as ExcelJS from 'exceljs';
 
 const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -133,36 +134,67 @@ export const reportAttendance: APIGatewayProxyHandler = async (event) => {
             attendanceMap.add(`${empId}_${dateStr}`);
         });
 
-        // Construir CSV
-        const headersCsv = ['Empleado', ...days.map(d => {
+        // Construir Excel
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Reporte de Asistencias');
+
+        // Headers
+        const headerDays = days.map(d => {
             const diasSemana = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
             const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
             return `${diasSemana[d.getUTCDay()]} ${d.getUTCDate()} ${meses[d.getUTCMonth()]}`;
-        })];
+        });
 
-        let csvString = headersCsv.join(',') + '\n';
+        const columnHeaders = ['Empleado', ...headerDays];
+        worksheet.addRow(columnHeaders);
 
+        // Header Styling
+        const headerRow = worksheet.getRow(1);
+        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        headerRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF4CAF50' }, // Green background
+        };
+        headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+
+        worksheet.getColumn(1).width = 35; // Wider Employee column
+
+        // Filas de datos
         for (const emp of employees) {
             const empName = `${emp.nombre} ${emp.apellidoPaterno} ${emp.apellidoMaterno ?? ''}`.trim();
-            const rowData = [empName.replace(/,/g, '')]; // Avoid commas in names
+            const rowData: (string | number)[] = [empName];
 
             for (const day of days) {
                 const dayStr = day.toISOString().split('T')[0];
                 const key = `${emp._id}_${dayStr}`;
-                rowData.push(attendanceMap.has(key) ? 'x' : '-');
+                rowData.push(attendanceMap.has(key) ? '✔' : 'X'); // Checkmark instead of 'x'
             }
 
-            csvString += rowData.join(',') + '\n';
+            const row = worksheet.addRow(rowData);
+
+            // Center align the checkmarks
+            for (let i = 2; i <= rowData.length; i++) {
+                row.getCell(i).alignment = { horizontal: 'center' };
+                if (row.getCell(i).value === '✔') {
+                    row.getCell(i).font = { color: { argb: 'FF008000' }, bold: true }; // Dark green
+                } else if (row.getCell(i).value === 'X') {
+                    row.getCell(i).font = { color: { argb: 'FFFF0000' }, bold: true }; // Red
+                }
+            }
         }
+
+        const buffer = await workbook.xlsx.writeBuffer();
 
         return {
             statusCode: 200,
+            isBase64Encoded: true,
             headers: {
                 ...headers,
-                'Content-Type': 'text/csv',
-                'Content-Disposition': 'attachment; filename="reporte_asistencia.csv"'
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition': 'attachment; filename="reporte_asistencia.xlsx"'
             },
-            body: csvString,
+            body: Buffer.from(buffer).toString('base64'),
         };
     } catch (error) {
         console.error("Error generating report:", error);
