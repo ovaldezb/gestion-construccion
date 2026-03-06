@@ -31,3 +31,5 @@ fi
 # 4. Deploy
 echo "🚀 Deploying to AWS..."
 ./node_modules/.bin/serverless deploy
+
+#flutter run --dart-define-from-file=.env.dev
