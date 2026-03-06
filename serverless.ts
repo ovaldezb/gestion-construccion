@@ -33,6 +33,13 @@ const serverlessConfiguration: AWS = {
                         ],
                         Resource: 'arn:aws:s3:::${self:service}-${self:provider.stage}-vehicle-photos/*',
                     },
+                    {
+                        Effect: 'Allow',
+                        Action: [
+                            'cognito-idp:AdminCreateUser'
+                        ],
+                        Resource: '*' // The ideal would be the UserPool ARN, but `*` is sufficient for a first pass
+                    }
                 ],
             },
         },
@@ -142,7 +149,12 @@ const serverlessConfiguration: AWS = {
                     },
                 },
             ],
-        }, registerAttendance: {
+        },
+        createUser: {
+            handler: 'src/handlers/users.createUser',
+            events: [{ http: { method: 'post', path: 'users', cors: true } }],
+        },
+        registerAttendance: {
             handler: 'src/handlers/attendance.registerAttendance',
             events: [{ http: { method: 'post', path: 'attendance', cors: true } }],
         },
