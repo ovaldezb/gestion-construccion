@@ -10,7 +10,7 @@ const serverlessConfiguration: AWS = {
         name: 'aws',
         runtime: 'nodejs20.x',
         stage: '${opt:stage, "dev"}',
-        region: 'us-east-1',
+        region: '${opt:region, "us-east-1"}' as any, // "as any" cast may be needed depending on @serverless/typescript version, but let's try just the string first
         environment: {
             AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
             NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
