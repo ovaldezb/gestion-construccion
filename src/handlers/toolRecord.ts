@@ -49,7 +49,6 @@ export const registerToolMovement: APIGatewayProxyHandler = async (event) => {
             employeeId,
             type,
             comentario,
-            comentario,
             timestamp: body.timestamp || new Date()
         });
 
@@ -81,7 +80,7 @@ export const registerToolMovement: APIGatewayProxyHandler = async (event) => {
 export const listToolRecords: APIGatewayProxyHandler = async (event) => {
     try {
         await executeConnection();
-        const { toolId, employeeId, searchType, id } = event.queryStringParameters || {};
+        const { toolId, employeeId, searchType, id, limit } = event.queryStringParameters || {};
         let query: any = {};
 
         // Support for generic searchType + id
@@ -95,10 +94,16 @@ export const listToolRecords: APIGatewayProxyHandler = async (event) => {
             if (employeeId) query.employeeId = employeeId;
         }
 
-        const records = await ToolRecord.find(query)
+        let dbQuery = ToolRecord.find(query)
             .populate('toolId', 'descripcion numeroSerie')
             .populate('employeeId', 'nombre apellidoPaterno')
             .sort({ timestamp: -1 });
+
+        if (limit) {
+            dbQuery = dbQuery.limit(parseInt(limit, 10));
+        }
+
+        const records = await dbQuery;
 
         return {
             statusCode: 200,
