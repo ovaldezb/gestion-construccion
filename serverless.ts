@@ -17,6 +17,21 @@ const serverlessConfiguration: AWS = {
             MONGODB_URI: '${env:MONGODB_URI}',
             // Usa una variable de entorno para local (serverless-offline) o una referencia de CF para deploy
             COGNITO_USER_POOL_ID: '${env:COGNITO_USER_POOL_ID, "Ref:CognitoUserPool"}',
+            VEHICLE_PHOTOS_BUCKET_NAME: '${self:service}-${self:provider.stage}-vehicle-photos',
+        },
+        iam: {
+            role: {
+                statements: [
+                    {
+                        Effect: 'Allow',
+                        Action: [
+                            's3:PutObject',
+                            's3:GetObject',
+                        ],
+                        Resource: 'arn:aws:s3:::${self:service}-${self:provider.stage}-vehicle-photos/*',
+                    },
+                ],
+            },
         },
     },
     functions: {
@@ -176,6 +191,10 @@ const serverlessConfiguration: AWS = {
             handler: 'src/handlers/vehicleRecord.getAllVehicleRecords',
             events: [{ http: { method: 'get', path: 'vehicle-records', cors: true } }],
         },
+        generateUploadUrl: {
+            handler: 'src/handlers/upload.generateUploadUrl',
+            events: [{ http: { method: 'get', path: 'upload-url', cors: true } }],
+        },
     },
     package: { individually: true },
     custom: {
@@ -224,6 +243,44 @@ const serverlessConfiguration: AWS = {
                         'ALLOW_USER_SRP_AUTH',
                     ],
                     GenerateSecret: false,
+                },
+            },
+            VehiclePhotosBucket: {
+                Type: 'AWS::S3::Bucket',
+                Properties: {
+                    BucketName: '${self:service}-${self:provider.stage}-vehicle-photos',
+                    PublicAccessBlockConfiguration: {
+                        BlockPublicAcls: false,
+                        BlockPublicPolicy: false,
+                        IgnorePublicAcls: false,
+                        RestrictPublicBuckets: false,
+                    },
+                    CorsConfiguration: {
+                        CorsRules: [
+                            {
+                                AllowedHeaders: ['*'],
+                                AllowedMethods: ['PUT', 'POST', 'GET', 'HEAD'],
+                                AllowedOrigins: ['*'],
+                                MaxAge: 3000,
+                            },
+                        ],
+                    },
+                },
+            },
+            VehiclePhotosBucketPolicy: {
+                Type: 'AWS::S3::BucketPolicy',
+                Properties: {
+                    Bucket: { Ref: 'VehiclePhotosBucket' },
+                    PolicyDocument: {
+                        Statement: [
+                            {
+                                Action: ['s3:GetObject'],
+                                Effect: 'Allow',
+                                Resource: 'arn:aws:s3:::${self:service}-${self:provider.stage}-vehicle-photos/*',
+                                Principal: '*',
+                            },
+                        ],
+                    },
                 },
             },
         },

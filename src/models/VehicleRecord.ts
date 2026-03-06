@@ -5,6 +5,7 @@ export interface IVehicleRecord extends Document {
     employeeId: Types.ObjectId; // Who is driving / registered the movement
     type: 'ENTRADA' | 'SALIDA';
     comentario?: string;
+    photoUrls?: string[];
     timestamp: Date;
 }
 
@@ -13,6 +14,7 @@ const VehicleRecordSchema = new Schema<IVehicleRecord>({
     employeeId: { type: Schema.Types.ObjectId, ref: 'Employee', required: true },
     type: { type: String, enum: ['ENTRADA', 'SALIDA'], required: true },
     comentario: { type: String },
+    photoUrls: [{ type: String }],
     timestamp: { type: Date, default: Date.now }
 }, {
     timestamps: true

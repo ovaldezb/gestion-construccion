@@ -1,6 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { executeConnection } from '../libs/db';
 import { VehicleRecord } from '../models/VehicleRecord';
+import { Vehicle } from '../models/Vehicle';
+import { Employee } from '../models/Employee';
 import '../models/Vehicle';
 import '../models/Employee';
 
@@ -12,36 +14,54 @@ const headers = {
 export const registerMovement: APIGatewayProxyHandler = async (event) => {
     try {
         await executeConnection();
-        const body = JSON.parse(event.body || '{}');
+        const { vehicleId, employeeId, type, comentario, photoUrls } = JSON.parse(event.body || '{}');
 
         // Validation
-        if (!body.vehicleId || !body.employeeId || !body.type) {
+        if (!vehicleId || !employeeId || !type) {
             return {
                 statusCode: 400,
-                headers,
-                body: JSON.stringify({ error: 'Missing required fields: vehicleId, employeeId, type' }),
+                headers, // Using existing headers constant
+                body: JSON.stringify({ error: 'Faltan campos (vehicleId, employeeId, type)' }),
             };
         }
 
-        if (body.type !== 'ENTRADA' && body.type !== 'SALIDA') {
+        // Validate items using exact IDs
+        const vehicle = await Vehicle.findById(vehicleId);
+        if (!vehicle) {
             return {
-                statusCode: 400,
-                headers,
-                body: JSON.stringify({ error: 'Invalid type, must be ENTRADA or SALIDA' }),
+                statusCode: 404,
+                headers, // Using existing headers constant
+                body: JSON.stringify({ error: 'Vehículo no encontrado. Escanea el código del vehículo válido.' }),
             };
         }
 
-        // We can add logic to check if previous status makes sense, etc, but keeping it simple for now
-        const record = await VehicleRecord.create({
-            vehicleId: body.vehicleId,
-            employeeId: body.employeeId,
-            type: body.type,
-            comentario: body.comentario,
-            timestamp: body.timestamp ? new Date(body.timestamp) : new Date()
+        if (type !== 'ENTRADA' && type !== 'SALIDA') {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'Tipo debe ser ENTRADA o SALIDA' }),
+            };
+        }
+
+        const employee = await Employee.findById(employeeId);
+        if (!employee) {
+            return {
+                statusCode: 404,
+                headers, // Using existing headers constant
+                body: JSON.stringify({ error: 'Empleado no encontrado. Escanea el código del empleado válido.' }),
+            };
+        }
+
+        const record = new VehicleRecord({
+            vehicleId,
+            employeeId,
+            type,
+            comentario,
+            photoUrls,
+            timestamp: new Date() // Simplified timestamp
         });
 
-        // Optionally update Vehicle with current status or who has it here, similar to Tool logic.
-        // E.g., if we added a `currentHolder` or `status` to Vehicle.
+        await record.save(); // Save the new record
 
         const populatedRecord = await record.populate(['vehicleId', 'employeeId']);
 
