@@ -2,6 +2,9 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import {
     CognitoIdentityProviderClient,
     AdminCreateUserCommand,
+    ListUsersCommand,
+    AdminDisableUserCommand,
+    AdminEnableUserCommand
 } from '@aws-sdk/client-cognito-identity-provider';
 
 // Hardcoded region or process.env.REGION could be used. 
@@ -90,6 +93,113 @@ export const createUser: APIGatewayProxyHandler = async (event) => {
             body: JSON.stringify({
                 message: error.message || 'Internal server error',
             }),
+        };
+    }
+};
+
+export const listUsers: APIGatewayProxyHandler = async (event) => {
+    try {
+        const userPoolId = process.env.COGNITO_USER_POOL_ID;
+
+        if (!userPoolId) {
+            return {
+                statusCode: 500,
+                headers: { 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ message: 'Server configuration error' }),
+            };
+        }
+
+        const command = new ListUsersCommand({
+            UserPoolId: userPoolId,
+        });
+
+        const response = await cognitoClient.send(command);
+
+        const users = response.Users?.map((u: any) => {
+            const attrs: any = {};
+            u.Attributes?.forEach((attr: any) => { if (attr.Name) attrs[attr.Name] = attr.Value; });
+            return {
+                username: u.Username,
+                status: u.UserStatus,
+                enabled: u.Enabled,
+                email: attrs['email'],
+                given_name: attrs['given_name'],
+                family_name: attrs['family_name'],
+                middle_name: attrs['middle_name'],
+                profile: attrs['custom:PROFILE'],
+                created_at: u.UserCreateDate,
+                updated_at: u.UserLastModifiedDate,
+            };
+        });
+
+        return {
+            statusCode: 200,
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify(users || []),
+        };
+    } catch (error: any) {
+        console.error('Error in listUsers:', error);
+        return {
+            statusCode: 500,
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ message: error.message || 'Internal server error' }),
+        };
+    }
+};
+
+export const toggleUserStatus: APIGatewayProxyHandler = async (event) => {
+    try {
+        const username = event.pathParameters?.username;
+        let bodyStr = event.body || '{}';
+        if (event.isBase64Encoded) {
+            bodyStr = Buffer.from(bodyStr, 'base64').toString('utf8');
+        }
+        const { enabled } = JSON.parse(bodyStr);
+
+        if (!username || typeof enabled !== 'boolean') {
+            return {
+                statusCode: 400,
+                headers: { 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ message: 'Missing username or valid enabled boolean status' }),
+            };
+        }
+
+        const userPoolId = process.env.COGNITO_USER_POOL_ID;
+
+        if (!userPoolId) {
+            return {
+                statusCode: 500,
+                headers: { 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ message: 'Server configuration error' }),
+            };
+        }
+
+        if (enabled) {
+            await cognitoClient.send(new AdminEnableUserCommand({
+                UserPoolId: userPoolId,
+                Username: username
+            }));
+        } else {
+            await cognitoClient.send(new AdminDisableUserCommand({
+                UserPoolId: userPoolId,
+                Username: username
+            }));
+        }
+
+        return {
+            statusCode: 200,
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({
+                message: `User ${enabled ? 'enabled' : 'disabled'} successfully`,
+            }),
+        };
+
+    } catch (error: any) {
+        console.error('Error in toggleUserStatus:', error);
+        return {
+            statusCode: 500,
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ message: error.message || 'Internal server error' }),
         };
     }
 };
