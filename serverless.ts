@@ -33,6 +33,16 @@ const serverlessConfiguration: AWS = {
                         ],
                         Resource: 'arn:aws:s3:::${self:service}-${self:provider.stage}-vehicle-photos/*',
                     },
+                    {
+                        Effect: 'Allow',
+                        Action: [
+                            'cognito-idp:AdminCreateUser',
+                            'cognito-idp:ListUsers',
+                            'cognito-idp:AdminDisableUser',
+                            'cognito-idp:AdminEnableUser'
+                        ],
+                        Resource: '*' // The ideal would be the UserPool ARN, but `*` is sufficient for a first pass
+                    }
                 ],
             },
         },
@@ -142,7 +152,20 @@ const serverlessConfiguration: AWS = {
                     },
                 },
             ],
-        }, registerAttendance: {
+        },
+        createUser: {
+            handler: 'src/handlers/users.createUser',
+            events: [{ http: { method: 'post', path: 'users', cors: true } }],
+        },
+        listUsers: {
+            handler: 'src/handlers/users.listUsers',
+            events: [{ http: { method: 'get', path: 'users', cors: true } }],
+        },
+        toggleUserStatus: {
+            handler: 'src/handlers/users.toggleUserStatus',
+            events: [{ http: { method: 'patch', path: 'users/{username}/status', cors: true } }],
+        },
+        registerAttendance: {
             handler: 'src/handlers/attendance.registerAttendance',
             events: [{ http: { method: 'post', path: 'attendance', cors: true } }],
         },
@@ -233,6 +256,12 @@ const serverlessConfiguration: AWS = {
                             Required: false,
                         },
                     ],
+                    AdminCreateUserConfig: {
+                        InviteMessageTemplate: {
+                            EmailMessage: '¡Bienvenido a LuViRex, {username}! Tu contraseña temporal es: {####} \nPor favor, inicia sesión para cambiarla.',
+                            EmailSubject: 'Tus credenciales de acceso para LuViRex',
+                        },
+                    },
                 },
             },
             CognitoUserPoolClient: {
