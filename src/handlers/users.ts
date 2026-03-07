@@ -19,7 +19,11 @@ export const createUser: APIGatewayProxyHandler = async (event) => {
             };
         }
 
-        const body = JSON.parse(event.body);
+        let bodyStr = event.body;
+        if (event.isBase64Encoded) {
+            bodyStr = Buffer.from(bodyStr, 'base64').toString('utf8');
+        }
+        const body = JSON.parse(bodyStr);
         const { email, given_name, family_name, middle_name, profile } = body;
 
         if (!email || !given_name || !family_name || !profile) {
