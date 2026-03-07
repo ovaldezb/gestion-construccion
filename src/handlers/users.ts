@@ -49,7 +49,7 @@ export const createUser: APIGatewayProxyHandler = async (event) => {
             { Name: 'email', Value: email },
             { Name: 'given_name', Value: given_name },
             { Name: 'family_name', Value: family_name },
-            { Name: 'custom:profile', Value: profile },
+            { Name: 'custom:PROFILE', Value: profile },
             { Name: 'email_verified', Value: 'true' },
         ];
 
