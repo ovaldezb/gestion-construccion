@@ -11,6 +11,7 @@ export interface IEmployee extends Document {
     isActivo: boolean;
     qrUrl?: string; // URL del QR generado
     photoUrl?: string; // S3 URL for employee photo
+    especialidad?: string; // Speciality if puesto is 'Oficial de albañil'
 }
 
 const EmployeeSchema = new Schema<IEmployee>({
@@ -23,7 +24,8 @@ const EmployeeSchema = new Schema<IEmployee>({
     idLocacion: { type: Schema.Types.ObjectId, ref: 'Location', required: false },
     isActivo: { type: Boolean, default: true },
     qrUrl: { type: String },
-    photoUrl: { type: String }
+    photoUrl: { type: String },
+    especialidad: { type: String }
 }, {
     timestamps: true
 });
