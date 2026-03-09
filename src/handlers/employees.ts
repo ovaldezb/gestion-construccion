@@ -33,11 +33,12 @@ export const createEmployee: APIGatewayProxyHandler = async (event) => {
             headers,
             body: JSON.stringify(employee),
         };
-    } catch (error) {
+    } catch (error: any) {
+        console.error('Error creating employee:', error);
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: 'Error creating employee', details: error }),
+            body: JSON.stringify({ error: 'Error creating employee', details: error.message || error }),
         };
     }
 };
