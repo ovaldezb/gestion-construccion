@@ -274,6 +274,11 @@ const serverlessConfiguration: AWS = {
                             EmailSubject: 'Tus credenciales de acceso para LuViRex',
                         },
                     },
+                    VerificationMessageTemplate: {
+                        DefaultEmailOption: 'CONFIRM_WITH_CODE',
+                        EmailMessage: 'Aquí está tu código de recuperación de contraseña de LuViRex: {####}',
+                        EmailSubject: 'Código de recuperación LuViRex',
+                    },
                 },
             },
             CognitoUserPoolClient: {
