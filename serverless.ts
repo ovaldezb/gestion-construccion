@@ -25,6 +25,7 @@ const serverlessConfiguration: AWS = {
             // Usa una variable de entorno para local (serverless-offline) o una referencia de CF para deploy
             COGNITO_USER_POOL_ID: '${env:COGNITO_USER_POOL_ID, "Ref:CognitoUserPool"}',
             VEHICLE_PHOTOS_BUCKET_NAME: '${self:service}-${self:provider.stage}-vehicle-photos',
+            ENV: '${env:ENV, "D"}',
         },
         apiGateway: {
             binaryMediaTypes: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
@@ -227,6 +228,10 @@ const serverlessConfiguration: AWS = {
         generateUploadUrl: {
             handler: 'src/handlers/upload.generateUploadUrl',
             events: [{ http: { method: 'get', path: 'upload-url', cors: true, authorizer: cognitoAuthorizer } }],
+        },
+        getEnv: {
+            handler: 'src/handlers/env.getEnv',
+            events: [{ http: { method: 'get', path: 'env', cors: true } }],
         },
     },
     package: { individually: true },
