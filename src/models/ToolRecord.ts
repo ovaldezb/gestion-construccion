@@ -5,6 +5,7 @@ export interface IToolRecord extends Document {
     employeeId: Types.ObjectId;
     type: 'ENTRADA' | 'SALIDA';
     comentario?: string;
+    photoUrls?: string[];
     timestamp: Date;
 }
 
@@ -13,6 +14,7 @@ const ToolRecordSchema = new Schema<IToolRecord>({
     employeeId: { type: Schema.Types.ObjectId, ref: 'Employee', required: true },
     type: { type: String, enum: ['ENTRADA', 'SALIDA'], required: true },
     comentario: { type: String },
+    photoUrls: { type: [String], default: [] },
     timestamp: { type: Date, default: Date.now }
 }, {
     timestamps: true

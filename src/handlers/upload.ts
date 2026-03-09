@@ -27,7 +27,7 @@ export const generateUploadUrl = async (event: APIGatewayProxyEvent): Promise<AP
 
         const folder = event.queryStringParameters?.folder || 'vehicle-photos';
         // Basic validation to prevent arbitrary paths
-        const validFolders = ['vehicle-photos', 'employee-photos'];
+        const validFolders = ['vehicle-photos', 'employee-photos', 'tool-photos'];
         const targetFolder = validFolders.includes(folder) ? folder : 'vehicle-photos';
 
         const key = `${targetFolder}/${Date.now()}-${fileName}`;
