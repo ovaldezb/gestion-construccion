@@ -10,6 +10,7 @@ export interface IEmployee extends Document {
     idLocacion?: Types.ObjectId | null; // Referencia a Location, opcional si es itinerante
     isActivo: boolean;
     qrUrl?: string; // URL del QR generado
+    photoUrl?: string; // S3 URL for employee photo
 }
 
 const EmployeeSchema = new Schema<IEmployee>({
@@ -21,7 +22,8 @@ const EmployeeSchema = new Schema<IEmployee>({
     tipoEmpleado: { type: String, enum: ['FIJO', 'ITINERANTE'], required: true },
     idLocacion: { type: Schema.Types.ObjectId, ref: 'Location', required: false },
     isActivo: { type: Boolean, default: true },
-    qrUrl: { type: String }
+    qrUrl: { type: String },
+    photoUrl: { type: String }
 }, {
     timestamps: true
 });
