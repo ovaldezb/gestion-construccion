@@ -13,8 +13,8 @@ export const createEmployee: APIGatewayProxyHandler = async (event) => {
         await executeConnection();
         const body = JSON.parse(event.body || '{}');
 
-        // Sanitize idLocacion: if empty string, remove it so Mongoose validation doesn't fail
-        if (body.idLocacion === '') {
+        // Sanitize idLocacion: if empty string or null, remove it so Mongoose validation doesn't fail
+        if (body.idLocacion === '' || body.idLocacion === null || body.idLocacion === undefined) {
             delete body.idLocacion;
         }
 
@@ -33,11 +33,12 @@ export const createEmployee: APIGatewayProxyHandler = async (event) => {
             headers,
             body: JSON.stringify(employee),
         };
-    } catch (error) {
+    } catch (error: any) {
+        console.error('Error creating employee:', error);
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: 'Error creating employee', details: error }),
+            body: JSON.stringify({ error: 'Error creating employee', details: error.message || error }),
         };
     }
 };
@@ -88,7 +89,7 @@ export const updateEmployee: APIGatewayProxyHandler = async (event) => {
         const body = JSON.parse(event.body || '{}');
 
         // Sanitize idLocacion
-        if (body.idLocacion === '') {
+        if (body.idLocacion === '' || body.idLocacion === null || body.idLocacion === undefined) {
             delete body.idLocacion;
         }
 

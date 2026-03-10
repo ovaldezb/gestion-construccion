@@ -13,7 +13,7 @@ export const registerToolMovement: APIGatewayProxyHandler = async (event) => {
     try {
         await executeConnection();
         const body = JSON.parse(event.body || '{}');
-        const { toolId, employeeId, type, comentario } = body;
+        const { toolId, employeeId, type, comentario, photoUrls } = body;
 
         // Validation
         if (!toolId || !employeeId || !type) {
@@ -49,6 +49,7 @@ export const registerToolMovement: APIGatewayProxyHandler = async (event) => {
             employeeId,
             type,
             comentario,
+            photoUrls: photoUrls || [],
             timestamp: body.timestamp || new Date()
         });
 

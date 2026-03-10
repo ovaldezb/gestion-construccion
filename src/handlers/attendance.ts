@@ -145,7 +145,7 @@ export const reportAttendance: APIGatewayProxyHandler = async (event) => {
             return `${diasSemana[d.getUTCDay()]} ${d.getUTCDate()} ${meses[d.getUTCMonth()]}`;
         });
 
-        const columnHeaders = ['Empleado', ...headerDays];
+        const columnHeaders = ['Empleado', 'Puesto', ...headerDays];
         worksheet.addRow(columnHeaders);
 
         // Header Styling
@@ -159,11 +159,19 @@ export const reportAttendance: APIGatewayProxyHandler = async (event) => {
         headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
 
         worksheet.getColumn(1).width = 35; // Wider Employee column
+        worksheet.getColumn(2).width = 20; // Puesto column
 
         // Filas de datos
         for (const emp of employees) {
             const empName = `${emp.nombre} ${emp.apellidoPaterno} ${emp.apellidoMaterno ?? ''}`.trim();
-            const rowData: (string | number)[] = [empName];
+
+            // Si es Oficial de albañil mostrar especialidad
+            let puestoCompleto = emp.puesto || 'Desconocido';
+            if (emp.puesto === 'Oficial de albañil' && emp.especialidad) {
+                puestoCompleto = `${emp.puesto} (${emp.especialidad})`;
+            }
+
+            const rowData: (string | number)[] = [empName, puestoCompleto];
 
             for (const day of days) {
                 const dayStr = day.toISOString().split('T')[0];
@@ -173,8 +181,8 @@ export const reportAttendance: APIGatewayProxyHandler = async (event) => {
 
             const row = worksheet.addRow(rowData);
 
-            // Center align the checkmarks
-            for (let i = 2; i <= rowData.length; i++) {
+            // Center align the checkmarks (starting from column 3)
+            for (let i = 3; i <= rowData.length; i++) {
                 row.getCell(i).alignment = { horizontal: 'center' };
                 if (row.getCell(i).value === '✔') {
                     row.getCell(i).font = { color: { argb: 'FF008000' }, bold: true }; // Dark green
