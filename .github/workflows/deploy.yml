@@ -35,6 +35,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
         COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+        ENV: ${{ secrets.ENV }}
 
   deploy-prod:
     name: Deploy to Prod
@@ -64,3 +65,4 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
         COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+        ENV: ${{ secrets.ENV }}
