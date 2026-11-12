@@ -2,7 +2,10 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-const s3 = new S3Client({ region: 'us-east-1' });
+// Lambda define AWS_REGION con la región donde se despliega el stack (y por lo tanto el bucket).
+// Fallback a us-east-1 para ejecución local.
+const region = process.env.AWS_REGION || 'us-east-1';
+const s3 = new S3Client({ region });
 
 export const generateUploadUrl = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
@@ -41,7 +44,7 @@ export const generateUploadUrl = async (event: APIGatewayProxyEvent): Promise<AP
         // URL expires in 5 minutes
         const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
 
-        const readUrl = `https://${bucketName}.s3.amazonaws.com/${key}`;
+        const readUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
 
         return {
             statusCode: 200,
